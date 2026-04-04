@@ -1,0 +1,85 @@
+{
+    "formatVersion": 1,
+    "name": "LWJGL 3",
+    "uid": "org.lwjgl",
+    "version": "3.3.3",
+    "libraries": [
+        {
+            "name": "org.lwjgl:lwjgl:3.3.3",
+            "url": "https://repo1.maven.org/maven2/"
+        },
+        {
+            "name": "org.lwjgl:lwjgl:3.3.3:natives-windows",
+            "url": "https://repo1.maven.org/maven2/",
+            "natives": {
+                "windows": "natives-windows"
+            }
+        },
+        {
+            "name": "org.lwjgl:lwjgl-glfw:3.3.3",
+            "url": "https://repo1.maven.org/maven2/"
+        },
+        {
+            "name": "org.lwjgl:lwjgl-glfw:3.3.3:natives-windows",
+            "url": "https://repo1.maven.org/maven2/",
+            "natives": {
+                "windows": "natives-windows"
+            }
+        },
+        {
+            "name": "org.lwjgl:lwjgl-opengl:3.3.3",
+            "url": "https://repo1.maven.org/maven2/"
+        },
+        {
+            "name": "org.lwjgl:lwjgl-opengl:3.3.3:natives-windows",
+            "url": "https://repo1.maven.org/maven2/",
+            "natives": {
+                "windows": "natives-windows"
+            }
+        },
+        {
+            "name": "org.lwjgl:lwjgl-openal:3.3.3",
+            "url": "https://repo1.maven.org/maven2/"
+        },
+        {
+            "name": "org.lwjgl:lwjgl-openal:3.3.3:natives-windows",
+            "url": "https://repo1.maven.org/maven2/",
+            "natives": {
+                "windows": "natives-windows"
+            }
+        },
+        {
+            "name": "org.lwjgl:lwjgl-stb:3.3.3",
+            "url": "https://repo1.maven.org/maven2/"
+        },
+        {
+            "name": "org.lwjgl:lwjgl-stb:3.3.3:natives-windows",
+            "url": "https://repo1.maven.org/maven2/",
+            "natives": {
+                "windows": "natives-windows"
+            }
+        },
+        {
+            "name": "org.lwjgl:lwjgl-jemalloc:3.3.3",
+            "url": "https://repo1.maven.org/maven2/"
+        },
+        {
+            "name": "org.lwjgl:lwjgl-jemalloc:3.3.3:natives-windows",
+            "url": "https://repo1.maven.org/maven2/",
+            "natives": {
+                "windows": "natives-windows"
+            }
+        },
+        {
+            "name": "org.lwjgl:lwjgl-tinyfd:3.3.3",
+            "url": "https://repo1.maven.org/maven2/"
+        },
+        {
+            "name": "org.lwjgl:lwjgl-tinyfd:3.3.3:natives-windows",
+            "url": "https://repo1.maven.org/maven2/",
+            "natives": {
+                "windows": "natives-windows"
+            }
+        }
+    ]
+}

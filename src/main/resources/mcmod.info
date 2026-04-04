@@ -1,0 +1,16 @@
+[
+{
+  "modid": "lwjgl3port",
+  "name": "LWJGL 3 Port",
+  "description": "Replaces LWJGL 2 with LWJGL 3 for Minecraft 1.8.9 via classpath shadowing.",
+  "version": "${version}",
+  "mcversion": "1.8.9",
+  "url": "",
+  "updateUrl": "",
+  "authorList": [],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
