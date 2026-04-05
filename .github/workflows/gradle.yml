@@ -28,15 +28,16 @@ jobs:
       uses: gradle/actions/setup-gradle@v4
       with:
         wrapper-validation: false
+        allow-snapshot-wrappers: true
 
     - name: Make gradlew executable
       run: chmod +x ./gradlew
 
     - name: Setup ForgeGradle workspace
-      run: ./gradlew setupDecompWorkspace
+      run: bash ./gradlew setupDecompWorkspace
 
     - name: Build with Gradle Wrapper
-      run: ./gradlew build
+      run: bash ./gradlew build
 
     # Upload all built JARs as artifacts
     - name: Upload build artifacts
