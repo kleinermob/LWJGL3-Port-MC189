@@ -35,6 +35,7 @@ jobs:
     - name: Install Gradle
       uses: gradle/actions/setup-gradle@v4
       with:
+        wrapper-validation: false
         gradle-version: '4.4.1'
         cache-read-only: false
 
