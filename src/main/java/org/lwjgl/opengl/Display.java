@@ -24,6 +24,9 @@ public class Display {
     private static boolean created = false;
     private static boolean closeRequested = false;
     private static boolean wasResized = false;
+    private static boolean fullscreen = false;
+    private static int windowedX = -1, windowedY = -1;
+    private static boolean pendingFullscreen = false;
 
     // Create GLFW window + GL context in static initializer so GL is ready
     // before ANY code can call GL functions (fixes crash in Forge splash screen)
@@ -98,6 +101,16 @@ public class Display {
         glfwShowWindow(window);
         created = true;
 
+        // LWJGL 2's Display.create() auto-creates Mouse and Keyboard.
+        // Minecraft relies on this — without it, Mouse.isCreated() == false
+        // and GuiScreen.handleInput() skips the mouse event loop entirely.
+        if (!org.lwjgl.input.Mouse.isCreated()) {
+            org.lwjgl.input.Mouse.create();
+        }
+        if (!org.lwjgl.input.Keyboard.isCreated()) {
+            org.lwjgl.input.Keyboard.create();
+        }
+
         System.out.println("[LWJGL3Port] Display.create() — window visible.");
     }
 
@@ -170,12 +183,25 @@ public class Display {
     public static void setDisplayMode(DisplayMode mode) throws LWJGLException {
         width = mode.getWidth();
         height = mode.getHeight();
-        if (created) {
-            glfwSetWindowSize(window, width, height);
-            glfwSetWindowPos(window,
-                (initialMode.getWidth() - width) / 2,
-                (initialMode.getHeight() - height) / 2
-            );
+        System.out.println("[LWJGL3Port] setDisplayMode(" + width + "x" + height + ") fullscreen=" + fullscreen + " initialMode=" + initialMode.getWidth() + "x" + initialMode.getHeight());
+        if (created && !fullscreen) {
+            // Check if this is a pre-fullscreen call (desktop resolution)
+            if (width == initialMode.getWidth() && height == initialMode.getHeight()) {
+                // Minecraft is about to go fullscreen — don't resize the window,
+                // just record the dimensions. setFullscreen(true) will handle it.
+                pendingFullscreen = true;
+                System.out.println("[LWJGL3Port]   -> pendingFullscreen=true (desktop res match)");
+            } else {
+                pendingFullscreen = false;
+                glfwSetWindowSize(window, width, height);
+                glfwSetWindowPos(window,
+                    (initialMode.getWidth() - width) / 2,
+                    (initialMode.getHeight() - height) / 2
+                );
+                System.out.println("[LWJGL3Port]   -> resized window to " + width + "x" + height);
+            }
+        } else if (fullscreen) {
+            System.out.println("[LWJGL3Port]   -> fullscreen=true, just recording width/height");
         }
     }
 
@@ -267,11 +293,59 @@ public class Display {
     // --- Fullscreen ---
 
     public static boolean isFullscreen() {
-        return false; // Windowed mode only for now
+        return fullscreen;
     }
 
-    public static void setFullscreen(boolean fullscreen) throws LWJGLException {
-        // Not implemented — windowed mode is standard for 1.8.9 modded
+    public static void setFullscreen(boolean fs) throws LWJGLException {
+        System.out.println("[LWJGL3Port] setFullscreen(" + fs + ") current fullscreen=" + fullscreen + " width=" + width + " height=" + height + " pending=" + pendingFullscreen);
+        if (fs == fullscreen) {
+            System.out.println("[LWJGL3Port]   -> no-op (already " + fs + ")");
+            return;
+        }
+        if (!created || window == NULL) {
+            fullscreen = fs;
+            return;
+        }
+
+        if (fs) {
+            // Save windowed position before switching
+            int[] xArr = new int[1], yArr = new int[1];
+            glfwGetWindowPos(window, xArr, yArr);
+            windowedX = xArr[0];
+            windowedY = yArr[0];
+            System.out.println("[LWJGL3Port]   -> saved windowed pos: (" + windowedX + "," + windowedY + ")");
+
+            fullscreen = true;
+            pendingFullscreen = false;
+
+            long monitor = glfwGetPrimaryMonitor();
+            GLFWVidMode vidMode = glfwGetVideoMode(monitor);
+            if (vidMode != null) {
+                System.out.println("[LWJGL3Port]   -> entering fullscreen " + vidMode.width() + "x" + vidMode.height() + "@" + vidMode.refreshRate());
+                glfwSetWindowMonitor(window, monitor, 0, 0,
+                    vidMode.width(), vidMode.height(), vidMode.refreshRate());
+                width = vidMode.width();
+                height = vidMode.height();
+            }
+        } else {
+            fullscreen = false;
+
+            // Minecraft called setDisplayMode(windowedRes) before this,
+            // so width/height already contain the target windowed size.
+            int restoreW = width;
+            int restoreH = height;
+            int restoreX = (initialMode.getWidth() - restoreW) / 2;
+            int restoreY = (initialMode.getHeight() - restoreH) / 2;
+            if (windowedX >= 0) restoreX = windowedX;
+            if (windowedY >= 0) restoreY = windowedY;
+
+            System.out.println("[LWJGL3Port]   -> restoring windowed: " + restoreW + "x" + restoreH + " at (" + restoreX + "," + restoreY + ")");
+            glfwSetWindowMonitor(window, NULL,
+                restoreX, restoreY, restoreW, restoreH, 0);
+            width = restoreW;
+            height = restoreH;
+        }
+        glfwSwapInterval(vsync ? 1 : 0);
     }
 
     // --- Location ---

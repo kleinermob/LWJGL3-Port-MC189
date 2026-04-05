@@ -126,12 +126,14 @@ public class Keyboard {
         final int key;
         final char character;
         final boolean state;
+        final boolean repeat;
         final long nanos;
 
-        KeyEvent(int key, char character, boolean state) {
+        KeyEvent(int key, char character, boolean state, boolean repeat) {
             this.key = key;
             this.character = character;
             this.state = state;
+            this.repeat = repeat;
             this.nanos = System.nanoTime();
         }
     }
@@ -140,7 +142,6 @@ public class Keyboard {
     private static KeyEvent currentEvent = null;
     private static boolean created = false;
     private static boolean repeatEvents = false;
-    private static char lastCharTyped = '\0';
 
     // GLFW→LWJGL2 and LWJGL2→GLFW lookup tables
     private static final int[] GLFW_TO_LWJGL2 = new int[GLFW.GLFW_KEY_LAST + 1];
@@ -260,16 +261,16 @@ public class Keyboard {
 
                 int lwjgl2Key = (key >= 0 && key < GLFW_TO_LWJGL2.length) ? GLFW_TO_LWJGL2[key] : 0;
                 boolean pressed = (action == GLFW.GLFW_PRESS || action == GLFW.GLFW_REPEAT);
-                eventQueue.add(new KeyEvent(lwjgl2Key, '\0', pressed));
+                boolean repeat = (action == GLFW.GLFW_REPEAT);
+                eventQueue.add(new KeyEvent(lwjgl2Key, '\0', pressed, repeat));
             }
         });
 
         GLFW.glfwSetCharCallback(window, new GLFWCharCallback() {
             @Override
             public void invoke(long win, int codepoint) {
-                lastCharTyped = (char) codepoint;
                 // Add a char-only event so Minecraft can read typed characters
-                eventQueue.add(new KeyEvent(0, (char) codepoint, true));
+                eventQueue.add(new KeyEvent(0, (char) codepoint, true, false));
             }
         });
 
@@ -308,6 +309,10 @@ public class Keyboard {
 
     public static long getEventNanoseconds() {
         return currentEvent != null ? currentEvent.nanos : System.nanoTime();
+    }
+
+    public static boolean isRepeatEvent() {
+        return currentEvent != null && currentEvent.repeat;
     }
 
     // --- Direct state query ---
