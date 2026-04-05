@@ -20,25 +20,37 @@ jobs:
         java-version: '8'
         distribution: 'temurin'
 
-    # Install Gradle manually to bypass wrapper validation
+    # Cache Gradle dependencies and Forge assets
+    - name: Cache Gradle packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+
+    # Install Gradle 4.4.1 (required by ForgeGradle 2.1)
     - name: Install Gradle
-      shell: powershell
-      run: |
-        Invoke-WebRequest -Uri "https://services.gradle.org/distributions/gradle-4.4.1-bin.zip" -OutFile "gradle.zip"
-        Expand-Archive -Path "gradle.zip" -DestinationPath "."
-        echo "$PWD\gradle-4.4.1\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      uses: gradle/actions/setup-gradle@v4
+      with:
+        gradle-version: '4.4.1'
+        cache-read-only: false
 
+    # Setup ForgeGradle workspace with retry for asset downloads
     - name: Setup ForgeGradle workspace
-      shell: powershell
-      run: |
-        # Use system Gradle instead of wrapper to avoid validation
-        gradle.bat setupDecompWorkspace --gradle-user-home=$HOME\.gradle
+      uses: nick-fields/retry@v3
+      with:
+        timeout_minutes: 30
+        max_attempts: 3
+        retry_on: error
+        command: |
+          ./gradlew setupDecompWorkspace --no-daemon --stacktrace
 
+    # Build the project
     - name: Build with Gradle
-      shell: powershell
-      run: |
-        # Use system Gradle for build
-        gradle.bat build --gradle-user-home=$HOME\.gradle
+      run: ./gradlew build --no-daemon --stacktrace
 
     # Upload all built JARs as artifacts
     - name: Upload build artifacts
@@ -46,3 +58,6 @@ jobs:
       with:
         name: LWJGL3Port-JARs
         path: build/libs/*.jar
+        retention-days: 30
+
+  # Skip dependency submission for this legacy project
