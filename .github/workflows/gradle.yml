@@ -10,7 +10,7 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v4
@@ -22,23 +22,23 @@ jobs:
 
     # Install Gradle manually to bypass wrapper validation
     - name: Install Gradle
+      shell: powershell
       run: |
-        wget https://services.gradle.org/distributions/gradle-4.4.1-bin.zip
-        unzip gradle-4.4.1-bin.zip
-        echo "$PWD/gradle-4.4.1/bin" >> $GITHUB_PATH
-
-    - name: Make gradlew executable
-      run: chmod +x ./gradlew
+        Invoke-WebRequest -Uri "https://services.gradle.org/distributions/gradle-4.4.1-bin.zip" -OutFile "gradle.zip"
+        Expand-Archive -Path "gradle.zip" -DestinationPath "."
+        echo "$PWD\gradle-4.4.1\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
     - name: Setup ForgeGradle workspace
+      shell: powershell
       run: |
         # Use system Gradle instead of wrapper to avoid validation
-        gradle setupDecompWorkspace --gradle-user-home=$HOME/.gradle
+        gradle.bat setupDecompWorkspace --gradle-user-home=$HOME\.gradle
 
     - name: Build with Gradle
+      shell: powershell
       run: |
         # Use system Gradle for build
-        gradle build --gradle-user-home=$HOME/.gradle
+        gradle.bat build --gradle-user-home=$HOME\.gradle
 
     # Upload all built JARs as artifacts
     - name: Upload build artifacts
