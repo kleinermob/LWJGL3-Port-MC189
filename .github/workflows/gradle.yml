@@ -27,8 +27,8 @@ jobs:
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v4
       with:
-        wrapper-validation: false
-        allow-snapshot-wrappers: true
+        allowed-checksums: |
+          62c8b4d42d3ac863dc44aada994f15de3b38f9d44877ea0e38e8e4b432bde8e5
 
     - name: Make gradlew executable
       run: chmod +x ./gradlew
