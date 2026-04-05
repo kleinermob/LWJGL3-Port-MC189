@@ -30,7 +30,7 @@ jobs:
     # Regenerate Gradle wrapper with official version
     - name: Regenerate Gradle wrapper
       shell: powershell
-      run: ./gradlew wrapper --gradle-version 4.4.1
+      run: gradlew.bat wrapper --gradle-version 4.4.1
 
     # Use proper Gradle Actions
     - name: Setup Gradle
@@ -38,11 +38,11 @@ jobs:
 
     # Setup ForgeGradle workspace
     - name: Setup ForgeGradle workspace
-      run: ./gradlew setupDecompWorkspace --no-daemon --stacktrace
+      run: gradlew.bat setupDecompWorkspace --no-daemon --stacktrace
 
     # Build the project
     - name: Build with Gradle
-      run: ./gradlew build --no-daemon --stacktrace
+      run: gradlew.bat build --no-daemon --stacktrace
 
     # Upload all built JARs as artifacts
     - name: Upload build artifacts
