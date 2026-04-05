@@ -20,34 +20,25 @@ jobs:
         java-version: '8'
         distribution: 'temurin'
 
-    # Cache Gradle dependencies and Forge assets
+    # Cache Gradle dependencies
     - name: Cache Gradle packages
       uses: actions/cache@v4
       with:
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/wrapper
-        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-        restore-keys: |
-          ${{ runner.os }}-gradle-
+        path: ~/.gradle
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
 
-    # Install Gradle 4.4.1 (required by ForgeGradle 2.1)
-    - name: Install Gradle
+    # Regenerate Gradle wrapper with official version
+    - name: Regenerate Gradle wrapper
+      shell: powershell
+      run: ./gradlew wrapper --gradle-version 4.4.1
+
+    # Use proper Gradle Actions
+    - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v4
-      with:
-        wrapper-validation: false
-        gradle-version: '4.4.1'
-        cache-read-only: false
 
-    # Setup ForgeGradle workspace with retry for asset downloads
+    # Setup ForgeGradle workspace
     - name: Setup ForgeGradle workspace
-      uses: nick-fields/retry@v3
-      with:
-        timeout_minutes: 30
-        max_attempts: 3
-        retry_on: error
-        command: |
-          ./gradlew setupDecompWorkspace --no-daemon --stacktrace
+      run: ./gradlew setupDecompWorkspace --no-daemon --stacktrace
 
     # Build the project
     - name: Build with Gradle
@@ -59,6 +50,3 @@ jobs:
       with:
         name: LWJGL3Port-JARs
         path: build/libs/*.jar
-        retention-days: 30
-
-  # Skip dependency submission for this legacy project
