@@ -29,6 +29,9 @@ jobs:
       with:
         wrapper-validation: false
 
+    - name: Make gradlew executable
+      run: chmod +x ./gradlew
+
     - name: Setup ForgeGradle workspace
       run: ./gradlew setupDecompWorkspace
 
